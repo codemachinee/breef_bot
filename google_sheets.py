@@ -9,7 +9,7 @@ from gspread_asyncio import AsyncioGspreadClientManager
 from loguru import logger
 from pytz import timezone
 
-from configs.passwords import loggs_acc
+from paswords import loggs_acc
 
 moscow_tz = timezone("Europe/Moscow")
 

@@ -9,26 +9,23 @@ from paswords import codemashine_test, loggs_acc, codemachinee_breef_bot
 from FSM import (
     Get_admin,
     Message_from_admin,
-    Next_level_base,
     Rassylka,
     message_from_admin_chat,
     message_from_admin_text,
     message_from_user,
-    rassylka,
-    count_price_step_one, count_price_step_two, handler_user_message_info
+    rassylka, Next_question_base_site,
 )
 from functions import clients_base
 from google_sheets import get_sheet_base
 from handlers import (
     check_callbacks,
     day_visitors,
-    handler_user_message,
+    # handler_user_message,
     help,
     menu,
     post,
-    reset_cash,
     sent_message,
-    start, reload_tables,
+    start
 )
 
 logger.remove()
@@ -66,17 +63,17 @@ dp.message.register(rassylka, Rassylka.post)
 dp.message.register(message_from_admin_chat, Message_from_admin.user_id)
 dp.message.register(message_from_admin_text, Message_from_admin.message)
 
-dp.callback_query.register(count_price_step_one, Next_level_base.info)
-dp.message.register(count_price_step_two, Next_level_base.quantity)
+# dp.callback_query.register(count_price_step_one, Next_level_base.info)
+# dp.message.register(count_price_step_two, Next_level_base.quantity)
 
-dp.callback_query.register(check_callbacks, Next_level_base.kategoriya)
-dp.callback_query.register(check_callbacks, Next_level_base.brand)
-dp.callback_query.register(check_callbacks, Next_level_base.model)
-dp.callback_query.register(check_callbacks, Next_level_base.price)
+dp.callback_query.register(check_callbacks, Next_question_base_site.q_1)
+# dp.callback_query.register(check_callbacks, Next_level_base.brand)
+# dp.callback_query.register(check_callbacks, Next_level_base.model)
+# dp.callback_query.register(check_callbacks, Next_level_base.price)
 dp.callback_query.register(check_callbacks, F.data)
 
-dp.message.register(handler_user_message_info, Next_level_base.info)
-dp.message.register(handler_user_message, F.text, F.chat.type == 'private')
+# dp.message.register(handler_user_message_info, Next_level_base.info)
+# dp.message.register(handler_user_message, F.text, F.chat.type == 'private')
 
 
 async def set_commands():
@@ -92,9 +89,9 @@ async def set_commands():
 async def main():
     try:
         logger.info('включение бота')
-        sheet_base =  await get_sheet_base()
+        # sheet_base =  await get_sheet_base()
         await set_commands()
-        await clients_base.load_base(await sheet_base.get_clients(bot))
+        # await clients_base.load_base(await sheet_base.get_clients(bot))
         await dp.start_polling(bot)
     except Exception as e:
         logger.exception(f'Ошибка в боте: {e}')

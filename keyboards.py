@@ -5,17 +5,17 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from loguru import logger
 
-from configs.passwords import loggs_acc
+from paswords import loggs_acc
 from structure import structure_menu
 
 
 class Buttons:  # класс для создания клавиатур различных категорий товаров
 
-    def __init__(self, bot, message, keys_dict, back_button=None, kategoriya='', menu_level='Пожалуйста выберите:'):
+    def __init__(self, bot, message, keys_dict, back_button=None, kategoriya='', question='Пожалуйста выберите:'):
         self.bot = bot
         self.message = message
         self.back_button = back_button
-        self.menu_level = menu_level
+        self.question = question
         self.keys_dict = keys_dict
         self.kategoriya = kategoriya
 
@@ -45,7 +45,7 @@ class Buttons:  # класс для создания клавиатур разл
             kb2 = types.InlineKeyboardMarkup(inline_keyboard=keyboard_list, resize_keyboard=True)
             await asyncio.sleep(0.3)
             await self.bot.edit_message_text(
-                text=f'{self.menu_level}', chat_id=self.message.chat.id, message_id=self.message.message_id, parse_mode='markdown')
+                text=f'{self.question}', chat_id=self.message.chat.id, message_id=self.message.message_id, parse_mode='markdown')
             await asyncio.sleep(0.1)
             await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id, message_id=self.message.message_id,
                                                      reply_markup=kb2)
@@ -61,7 +61,7 @@ class Buttons:  # класс для создания клавиатур разл
         try:
             keys = {}
             keyboard_list = []
-            keys_list = list(self.keys_dict.keys())
+            keys_list = list(self.keys_dict)
             for i in keys_list:
                 index = keys_list.index(i)
                 button = types.InlineKeyboardButton(text=i, callback_data=i)
@@ -80,7 +80,7 @@ class Buttons:  # класс для создания клавиатур разл
                     keyboard_list.append([button])
             kb2 = types.InlineKeyboardMarkup(inline_keyboard=keyboard_list, resize_keyboard=True)
             await asyncio.sleep(0.3)
-            await self.bot.send_message(chat_id=self.message.chat.id, text=f'{self.menu_level}',
+            await self.bot.send_message(chat_id=self.message.chat.id, text=f'{self.question}',
                                        message_thread_id=self.message.message_thread_id, reply_markup=kb2)
         except TelegramBadRequest as e:
             if "message is not modified" not in str(e):
