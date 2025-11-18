@@ -25,7 +25,8 @@ class Rassylka(StatesGroup):
     post = State()
 
 
-class Next_question_base_site(StatesGroup):
+class Next_question_base(StatesGroup):
+    reason = State()
     q_1 = State()
     q_2 = State()
     q_3 = State()

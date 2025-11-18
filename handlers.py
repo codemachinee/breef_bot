@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
 from paswords import admins_list, group_id, loggs_acc, admin_id
-from FSM import Get_admin, Message_from_admin, Rassylka, Next_question_base_site
+from FSM import Get_admin, Message_from_admin, Rassylka, Next_question_base
 from google_sheets import find_product, get_sheet_base, data_updater
 from functions import clients_base, is_today
 from keyboards import Buttons
@@ -25,6 +25,7 @@ async def start(message: Message, bot, state: FSMContext):
                                    parse_mode='html')
             await Buttons(bot, message, structure_menu["Основное меню"],
                           question='Пожалуйста выберите интересующий пункт меню:').new_main_menu_buttons()
+            await state.set_state(Next_question_base.reason)
         else:
             await bot.send_message(message.chat.id, '<b>Бот-опросник для разработки цифровых продуктов инициализирован.</b>\n'
                                                     '/help - справка по боту',
@@ -32,13 +33,14 @@ async def start(message: Message, bot, state: FSMContext):
                                    parse_mode='html')
             await Buttons(bot, message, structure_menu["Основное меню"],
                           question='Пожалуйста выберите интересующий пункт меню:').new_main_menu_buttons()
+            await state.set_state(Next_question_base.reason)
     except Exception as e:
         logger.exception('Ошибка в handlers/start', e)
         await bot.send_message(loggs_acc, f'Ошибка в handlers/start: {e}')
 
 
 async def help(message: Message, bot, state: FSMContext):
-    await state.clear()
+    # await state.clear()
     if message.chat.id in admins_list:      # условия демонстрации различных команд для админа и клиентов
         await bot.send_message(message.chat.id, '<b>Основные команды поддерживаемые ботом:\n</b>'
                                                      '/menu - главное функциональное меню\n'
@@ -48,6 +50,8 @@ async def help(message: Message, bot, state: FSMContext):
                                                      '/sent_message -  отправка через бота сообщения клиенту по id чата\n'
                                                      '/day_visitors - пользователи посетившие бота сегодня',
                                parse_mode='html')
+        data = await state.get_data()
+        print(data.get('reason'))
     else:
         await bot.send_message(message.chat.id, '<b>Основные команды поддерживаемые ботом:\n</b>'
                                                      '/menu - главное функциональное меню\n'
@@ -61,10 +65,12 @@ async def menu(message: Message, bot, state: FSMContext):
     if message.chat.id in admins_list:  # условия демонстрации различных команд для админа и клиентов
         await Buttons(bot, message, structure_menu["Основное меню"],
                       question='Пожалуйста выберите интересующий пункт меню:').new_main_menu_buttons()
+        await state.set_state(Next_question_base.reason)
 
     else:
         await Buttons(bot, message, structure_menu["Основное меню"],
                       question='Пожалуйста выберите интересующий пункт меню:').new_main_menu_buttons()
+        await state.set_state(Next_question_base.reason)
 
 
 async def post(message: Message, bot, state: FSMContext):
@@ -132,10 +138,12 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
     assert callback.data is not None
     try:
         if callback.data == 'ℹ️ О нас':
+            await state.clear()
             await Buttons(bot, callback.message, {},"Основное меню",
                           question=HELP_TEXT).menu_buttons()
 
         elif callback.data == "👨🏻‍💻 Чат с администратором":
+            await state.clear()
             await bot.edit_message_text(chat_id=callback.message.chat.id,
                                    text='Информация передана администратору, с Вами скоро свяжутся. '
                                         'Если желаете сообщить что-то дополнительно, отправьте в сообщении 💬\n'
@@ -153,12 +161,13 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
         elif callback.data == "Основное меню":
             await state.clear()
             await Buttons(bot, callback.message, structure_menu["Основное меню"], question= "Пожалуйста выберите интересующий пункт меню:").menu_buttons()
+            await state.set_state(Next_question_base.reason)
 
         elif callback.data == '🌐 Опрос "создание сайта"' or '🤖 Опрос "создание бота"' or '🖼 Опрос "другое"':
             await Buttons(bot, callback.message, ['2 вопрос'],
                           back_button="Основное меню",
                           question= structure_menu["Основное меню"][callback.data]['1 вопрос']).menu_buttons()
-            await state.set_state(Next_question_base_site.q_1)
+            await state.set_state(Next_question_base.q_1)
     #
     #     elif callback.data in structure_menu["Основное меню"]["📦 Закупка оптом"]:
     #         await Buttons(bot, callback.message, structure_menu["Основное меню"]["📦 Закупка оптом"][f'{callback.data}'],
