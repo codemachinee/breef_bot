@@ -93,13 +93,13 @@ class Buttons:  # класс для создания клавиатур разл
     #         await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/new_main_menu_buttons: {e}')
 
 
-    async def breef_buttons(self, idx=1):
+    async def breef_buttons(self, idx=1, bot_message_id=None):
         try:
             if idx == 1:
                 kb_breef = InlineKeyboardMarkup(inline_keyboard=[
                     [InlineKeyboardButton(text='⬅️ Предыдущий вопрос', callback_data='назад')],
                     [InlineKeyboardButton(text='❌ Отмена', callback_data="Основное меню")]])
-                await self.bot.delete_message(self.message.from_user.id)
+                await self.bot.delete_message(chat_id=self.message.chat.id, message_id=self.message.from_user_id)
             else:
                 kb_breef = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='❌ Отмена',
                                                                                        callback_data="Основное меню")]])
@@ -111,10 +111,10 @@ class Buttons:  # класс для создания клавиатур разл
                                                      message_id=self.message.message_id, reply_markup=kb_breef)
         except TelegramBadRequest as e:
             if "message is not modified" not in str(e):
-                logger.info('Ошибка в keyboards/new_main_menu_buttons', e)
+                logger.info('Ошибка в keyboards/breef_buttons', e)
         except Exception as e:
             logger.exception('Ошибка в keyboards/menu_buttons', e)
-            await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/new_main_menu_buttons: {e}')
+            await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/breef_buttons: {e}')
 
 
     async def rasylka_buttons(self):

@@ -56,12 +56,12 @@ dp.message.register(sent_message, Command(commands='sent_message'))
 dp.message.register(day_visitors, Command(commands='day_visitors'))
 
 #
-dp.message.register(message_from_user, Get_admin.message)
-#
-dp.message.register(rassylka, Rassylka.post)
-#
-dp.message.register(message_from_admin_chat, Message_from_admin.user_id)
-dp.message.register(message_from_admin_text, Message_from_admin.message)
+# dp.message.register(message_from_user, Get_admin.message)
+# #
+# dp.message.register(rassylka, Rassylka.post)
+# #
+# dp.message.register(message_from_admin_chat, Message_from_admin.user_id)
+# dp.message.register(message_from_admin_text, Message_from_admin.message)
 
 # dp.callback_query.register(count_price_step_one, Next_level_base.info)
 # dp.message.register(count_price_step_two, Next_level_base.quantity)
