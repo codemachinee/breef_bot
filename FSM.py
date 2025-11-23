@@ -25,35 +25,8 @@ class Rassylka(StatesGroup):
     post = State()
 
 
-class Next_question_base(StatesGroup):
-    reason = State()
-    q_1 = State()
-    q_2 = State()
-    q_3 = State()
-    q_4 = State()
-    q_5 = State()
-    q_6 = State()
-    q_7 = State()
-    q_8 = State()
-    q_9 = State()
-    q_10 = State()
-    q_11 = State()
-    q_12 = State()
-    q_13 = State()
-    q_14 = State()
-    q_15 = State()
-    q_16 = State()
-    q_17 = State()
-    q_18 = State()
-    q_19 = State()
-    q_20 = State()
-    q_21 = State()
-
-
-class Get_product_info(StatesGroup):
-    info = State()
-    quantity = State()
-    price = State()
+class Breef(StatesGroup):
+    in_progress = State()
 
 
 async def message_from_user(message, state: FSMContext, bot):
@@ -243,3 +216,4 @@ async def rassylka(message, bot, state: FSMContext):
 #     except Exception as e:
 #         logger.exception('Ошибка в FSM/handler_user_message_info', e)
 #         await bot.send_message(loggs_acc, f'Ошибка в FSM/handler_user_message_info: {e}')
+

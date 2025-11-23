@@ -13,8 +13,7 @@ from FSM import (
     message_from_admin_chat,
     message_from_admin_text,
     message_from_user,
-    rassylka,
-    Next_question_base,
+    rassylka, Breef
 )
 from functions import clients_base
 from google_sheets import get_sheet_base
@@ -26,7 +25,7 @@ from handlers import (
     menu,
     post,
     sent_message,
-    start
+    start, check_messages
 )
 
 logger.remove()
@@ -67,14 +66,13 @@ dp.message.register(message_from_admin_text, Message_from_admin.message)
 # dp.callback_query.register(count_price_step_one, Next_level_base.info)
 # dp.message.register(count_price_step_two, Next_level_base.quantity)
 
-dp.callback_query.register(check_callbacks, Next_question_base.reason)
-# dp.callback_query.register(check_callbacks, Next_level_base.brand)
+dp.callback_query.register(check_callbacks, Breef.in_progress)
 # dp.callback_query.register(check_callbacks, Next_level_base.model)
 # dp.callback_query.register(check_callbacks, Next_level_base.price)
-# dp.callback_query.register(check_callbacks, F.data)
+dp.callback_query.register(check_callbacks, F.data)
 
 # dp.message.register(handler_user_message_info, Next_level_base.info)
-# dp.message.register(handler_user_message, F.text, F.chat.type == 'private')
+dp.message.register(check_messages, F.text, Breef.in_progress)
 
 
 async def set_commands():

@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
 from paswords import admins_list, group_id, loggs_acc, admin_id
-from FSM import Get_admin, Message_from_admin, Rassylka, Next_question_base
+from FSM import (Get_admin, Message_from_admin, Rassylka, Breef)
 from google_sheets import find_product, get_sheet_base, data_updater
 from functions import clients_base, is_today
 from keyboards import Buttons
@@ -24,16 +24,14 @@ async def start(message: Message, bot, state: FSMContext):
                                    message_thread_id=message.message_thread_id,
                                    parse_mode='html')
             await Buttons(bot, message, structure_menu["Основное меню"],
-                          question='Пожалуйста выберите интересующий пункт меню:').new_main_menu_buttons()
-            await state.set_state(Next_question_base.reason)
+                          question='Пожалуйста выберите интересующий пункт меню:').menu_buttons()
         else:
             await bot.send_message(message.chat.id, '<b>Бот-опросник для разработки цифровых продуктов инициализирован.</b>\n'
                                                     '/help - справка по боту',
                                    message_thread_id=message.message_thread_id,
                                    parse_mode='html')
             await Buttons(bot, message, structure_menu["Основное меню"],
-                          question='Пожалуйста выберите интересующий пункт меню:').new_main_menu_buttons()
-            await state.set_state(Next_question_base.reason)
+                          question='Пожалуйста выберите интересующий пункт меню:').menu_buttons()
     except Exception as e:
         logger.exception('Ошибка в handlers/start', e)
         await bot.send_message(loggs_acc, f'Ошибка в handlers/start: {e}')
@@ -50,8 +48,6 @@ async def help(message: Message, bot, state: FSMContext):
                                                      '/sent_message -  отправка через бота сообщения клиенту по id чата\n'
                                                      '/day_visitors - пользователи посетившие бота сегодня',
                                parse_mode='html')
-        data = await state.get_data()
-        print(data.get('reason'))
     else:
         await bot.send_message(message.chat.id, '<b>Основные команды поддерживаемые ботом:\n</b>'
                                                      '/menu - главное функциональное меню\n'
@@ -64,13 +60,11 @@ async def menu(message: Message, bot, state: FSMContext):
     await state.clear()
     if message.chat.id in admins_list:  # условия демонстрации различных команд для админа и клиентов
         await Buttons(bot, message, structure_menu["Основное меню"],
-                      question='Пожалуйста выберите интересующий пункт меню:').new_main_menu_buttons()
-        await state.set_state(Next_question_base.reason)
+                      question='Пожалуйста выберите интересующий пункт меню:').menu_buttons()
 
     else:
         await Buttons(bot, message, structure_menu["Основное меню"],
-                      question='Пожалуйста выберите интересующий пункт меню:').new_main_menu_buttons()
-        await state.set_state(Next_question_base.reason)
+                      question='Пожалуйста выберите интересующий пункт меню:').menu_buttons()
 
 
 async def post(message: Message, bot, state: FSMContext):
@@ -161,13 +155,25 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
         elif callback.data == "Основное меню":
             await state.clear()
             await Buttons(bot, callback.message, structure_menu["Основное меню"], question= "Пожалуйста выберите интересующий пункт меню:").menu_buttons()
-            await state.set_state(Next_question_base.reason)
 
         elif callback.data == '🌐 Опрос "создание сайта"' or '🤖 Опрос "создание бота"' or '🖼 Опрос "другое"':
-            await Buttons(bot, callback.message, ['2 вопрос'],
-                          back_button="Основное меню",
-                          question= structure_menu["Основное меню"][callback.data]['1 вопрос']).menu_buttons()
-            await state.set_state(Next_question_base.q_1)
+            await Buttons(bot, callback.message, question=structure_menu["Основное меню"][callback.data][0]).breef_buttons(idx=0)
+            await state.update_data(section=callback.data, question_idx=0, answers=[])
+            await state.set_state(Breef.in_progress)
+
+        elif callback.data == "назад":
+            data = await state.get_data()
+            section = data['section']
+            idx = data['question_idx']
+            answers = data['answers']
+            idx -= 1
+            answers.pop()  # Удаляем последний ответ
+            await state.update_data(question_idx=idx, answers=answers)
+            if idx == 0:
+                await Buttons(bot, callback.message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(idx=0)
+            else:
+                await Buttons(bot, callback.message, question=structure_menu["Основное меню"][section][idx]).breef_buttons()
+
     #
     #     elif callback.data in structure_menu["Основное меню"]["📦 Закупка оптом"]:
     #         await Buttons(bot, callback.message, structure_menu["Основное меню"]["📦 Закупка оптом"][f'{callback.data}'],
@@ -332,3 +338,50 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
 #         await message.answer(answer)
 
 
+async def check_messages(message: Message, bot, state: FSMContext):
+    if message.text == "назад":
+        data = await state.get_data()
+        section = data['section']
+        idx = data['question_idx']
+        answers = data['answers']
+        idx -= 1
+        answers.pop()  # Удаляем последний ответ
+        await state.update_data(question_idx=idx, answers=answers)
+        if idx == 0:
+            await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(idx=0)
+        else:
+            await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons()
+    elif message.text == "Основное меню":
+        await state.clear()
+        await Buttons(bot, message, structure_menu["Основное меню"],
+                          question= "Пожалуйста выберите интересующий пункт меню:").menu_buttons()
+    else:
+        data = await state.get_data()
+        section = data['section']
+        idx = data['question_idx']
+        answers = data['answers']
+        if len(answers) > idx:
+            answers[idx] = message.text
+        else:
+            answers.append(message.text)
+
+        idx += 1
+
+        if idx < len(questions[section]):
+            await state.update_data(question_idx=idx, answers=answers)
+            await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(idx=0)
+        else:
+            await Buttons(bot, message, question="Большое спасибо за прохождение опроса! Ваши ответы будут учтены "
+                                                 "при разработке:\n" + "\n".join(answers)).breef_buttons(idx=0)
+            # await bot.send_message(admin_id, f'🚨!!!СРОЧНО!!!🚨\n'
+            #                                  f'<b>Заполненный бриф от:</b>\n'
+            #                                  f'Псевдоним: @{message.from_user.username}\n'
+            #                                  f'id чата: {message.chat.id}\n\n'
+            #                                  f'<b>Предмет интереса:</b>\n'
+            #                                  f'категория: {section}\n'
+            #                                  f'ответы: {"\n".join(answers)}\n'
+            #                                  '/sent_message - отправить сообщение с помощью бота', parse_mode='html')
+            await bot.send_message(admin_id, 'Дополнительная информация в гугл таблице: '
+                                             'https://docs.google.com/spreadsheets/d/'
+                                             '1oGihEnG8KIsnZxd8W_B-TxGc10s_aOxpLPZgaqFBTIc/edit?usp=sharing')
+            await state.clear()

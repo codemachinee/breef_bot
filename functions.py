@@ -52,6 +52,7 @@ async def is_today(date_str: str) -> bool:
         return False  # если строка не распарсилась
 
 
+# напиши функцию для вычисления факториала
 
 # asyncio.run(clients_base.load_base(asyncio.run(Sheet_base(None, None).get_clients())))
 # # print(asyncio.run(clients_base.get_clients()))
