@@ -156,11 +156,6 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
             await state.clear()
             await Buttons(bot, callback.message, structure_menu["Основное меню"], question= "Пожалуйста выберите интересующий пункт меню:").menu_buttons()
 
-        elif callback.data == '🌐 Опрос "создание сайта"' or '🤖 Опрос "создание бота"' or '🖼 Опрос "другое"':
-            bot_message = await Buttons(bot, callback.message, question=structure_menu["Основное меню"][callback.data][0]).breef_buttons(idx=0)
-            await state.update_data(section=callback.data, question_idx=0, answers=[], bot_message_id=bot_message.message_id)
-            await state.set_state(Breef.in_progress)
-
         elif callback.data == "назад":
             data = await state.get_data()
             section = data['section']
@@ -168,12 +163,17 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
             answers = data['answers']
             bot_message_id = data['bot_message_id']
             idx -= 1
-            answers.pop()  # Удаляем последний ответ
             if idx == 0:
-                bot_message = await Buttons(bot, callback.message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(idx=0)
+                bot_message = await Buttons(bot, callback.message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(bot_message_id, idx=0, answer=answers[idx])
             else:
-                bot_message = await Buttons(bot, callback.message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(bot_message_id=bot_message_id)
+                bot_message = await Buttons(bot, callback.message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(bot_message_id=bot_message_id, answer=answers[idx])
+            # answers.pop()
             await state.update_data(question_idx=idx, answers=answers, bot_message_id=bot_message.message_id)
+
+        elif callback.data == '🌐 Опрос "создание сайта"' or '🤖 Опрос "создание бота"' or '🖼 Опрос "другое"':
+            bot_message = await Buttons(bot, callback.message, question=structure_menu["Основное меню"][callback.data][0]).breef_buttons(callback.message.message_id, idx=0)
+            await state.update_data(section=callback.data, question_idx=0, answers=[], bot_message_id=bot_message.message_id)
+            await state.set_state(Breef.in_progress)
 
     #
     #     elif callback.data in structure_menu["Основное меню"]["📦 Закупка оптом"]:
@@ -347,12 +347,13 @@ async def check_messages(message: Message, bot, state: FSMContext):
         answers = data['answers']
         bot_message_id = data['bot_message_id']
         idx -= 1
+        if idx == 0:
+            await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(bot_message_id, idx=0, answer=answers[idx])
+        else:
+            await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(bot_message_id=bot_message_id, answer=answers[idx])
         answers.pop()  # Удаляем последний ответ
         await state.update_data(question_idx=idx, answers=answers)
-        if idx == 0:
-            await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(idx=0)
-        else:
-            await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(bot_message_id=bot_message_id)
+
     elif message.text == "Основное меню":
         await state.clear()
         await Buttons(bot, message, structure_menu["Основное меню"],
@@ -372,10 +373,10 @@ async def check_messages(message: Message, bot, state: FSMContext):
 
         if idx < len(structure_menu["Основное меню"][section]):
             await state.update_data(question_idx=idx, answers=answers)
-            await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(idx=0)
+            await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(bot_message_id, idx=1)
         else:
             await Buttons(bot, message, question="Большое спасибо за прохождение опроса! Ваши ответы будут учтены "
-                                                 "при разработке:\n" + "\n".join(answers)).breef_buttons(idx=0, bot_message_id=bot_message_id)
+                                                 "при разработке:\n" + "\n".join(answers)).breef_buttons(idx=1, bot_message_id=bot_message_id)
             # await bot.send_message(admin_id, f'🚨!!!СРОЧНО!!!🚨\n'
             #                                  f'<b>Заполненный бриф от:</b>\n'
             #                                  f'Псевдоним: @{message.from_user.username}\n'

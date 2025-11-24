@@ -93,27 +93,36 @@ class Buttons:  # класс для создания клавиатур разл
     #         await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/new_main_menu_buttons: {e}')
 
 
-    async def breef_buttons(self, idx=1, bot_message_id=None):
+    async def breef_buttons(self, bot_message_id, idx=1, answer=None):
+        # idx = 1 - со 2 по последний вопросы при последовательном ответе на вопросы
+        # idx = 0 - 1 вопрос
+        if answer is None:
+            question_text = self.question
+        else:
+            question_text = f'{self.question}\n\nВаш ответ:{answer}'
         try:
             if idx == 1:
                 kb_breef = InlineKeyboardMarkup(inline_keyboard=[
                     [InlineKeyboardButton(text='⬅️ Предыдущий вопрос', callback_data='назад')],
                     [InlineKeyboardButton(text='❌ Отмена', callback_data="Основное меню")]])
-                await self.bot.delete_message(chat_id=self.message.chat.id, message_id=self.message.from_user_id)
+                if answer is None:
+                    # удаление вопроса пользователя происходит только
+                    await self.bot.delete_message(chat_id=self.message.chat.id, message_id=self.message.message_id)
+
             else:
                 kb_breef = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='❌ Отмена',
                                                                                        callback_data="Основное меню")]])
-            await self.bot.edit_message_text(
-                text=f'{self.question}', chat_id=self.message.chat.id, message_id=self.message.message_id,
+            message = await self.bot.edit_message_text(
+                text=f'{question_text}', chat_id=self.message.chat.id, message_id=bot_message_id,
                 parse_mode='markdown')
             await asyncio.sleep(0.1)
             await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id,
-                                                     message_id=self.message.message_id, reply_markup=kb_breef)
+                                                     message_id=bot_message_id, reply_markup=kb_breef)
+            return message
         except TelegramBadRequest as e:
-            if "message is not modified" not in str(e):
-                logger.info('Ошибка в keyboards/breef_buttons', e)
+            logger.info('Ошибка в keyboards/breef_buttons', e)
         except Exception as e:
-            logger.exception('Ошибка в keyboards/menu_buttons', e)
+            logger.exception('Ошибка в keyboards/breef_buttons', e)
             await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/breef_buttons: {e}')
 
 
