@@ -108,6 +108,10 @@ class Buttons:  # класс для создания клавиатур разл
                 if answer is None:
                     # удаление вопроса пользователя происходит только
                     await self.bot.delete_message(chat_id=self.message.chat.id, message_id=self.message.message_id)
+            elif idx == 2:
+                kb_breef = InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text='✅ Отправить ответы', callback_data='✅ Отправить ответы')],
+                    [InlineKeyboardButton(text='❌ Отмена', callback_data="Основное меню")]])
 
             else:
                 kb_breef = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='❌ Отмена',

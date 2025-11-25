@@ -376,7 +376,7 @@ async def check_messages(message: Message, bot, state: FSMContext):
             await Buttons(bot, message, question=structure_menu["Основное меню"][section][idx]).breef_buttons(bot_message_id, idx=1)
         else:
             await Buttons(bot, message, question="Большое спасибо за прохождение опроса! Ваши ответы будут учтены "
-                                                 "при разработке:\n" + "\n".join(answers)).breef_buttons(idx=1, bot_message_id=bot_message_id)
+                                                 "при разработке:\n" + "\n".join(answers)).breef_buttons(idx=2, bot_message_id=bot_message_id)
             # await bot.send_message(admin_id, f'🚨!!!СРОЧНО!!!🚨\n'
             #                                  f'<b>Заполненный бриф от:</b>\n'
             #                                  f'Псевдоним: @{message.from_user.username}\n'
