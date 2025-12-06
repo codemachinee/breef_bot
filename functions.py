@@ -6,7 +6,6 @@ import aiohttp
 from aiogram.types import Message
 from loguru import logger
 
-CBR_URL = "https://www.cbr.ru/scripts/XML_daily.asp"
 
 
 class Clients:
@@ -50,13 +49,4 @@ async def is_today(date_str: str) -> bool:
         return input_date.date() == now.date()
     except ValueError:
         return False  # если строка не распарсилась
-
-
-# напиши функцию для вычисления факториала
-
-# asyncio.run(clients_base.load_base(asyncio.run(Sheet_base(None, None).get_clients())))
-# # print(asyncio.run(clients_base.get_clients()))
-#
-# for i in asyncio.run(clients_base.get_clients()).values():
-#     print(asyncio.run(is_today(i["date"])))
 

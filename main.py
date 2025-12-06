@@ -88,9 +88,9 @@ async def set_commands():
 async def main():
     try:
         logger.info('включение бота')
-        # sheet_base =  await get_sheet_base()
+        sheet_base =  await get_sheet_base()
         await set_commands()
-        # await clients_base.load_base(await sheet_base.get_clients(bot))
+        await clients_base.load_base(await sheet_base.get_clients(bot))
         await dp.start_polling(bot)
     except Exception as e:
         logger.exception(f'Ошибка в боте: {e}')

@@ -47,14 +47,15 @@ class Buttons:  # класс для создания клавиатур разл
             kb2 = types.InlineKeyboardMarkup(inline_keyboard=keyboard_list, resize_keyboard=True)
             await asyncio.sleep(0.3)
             await self.bot.edit_message_text(
-                text=f'{self.question}', chat_id=self.message.chat.id, message_id=self.message.message_id, parse_mode='markdown')
+                text=self.question, chat_id=self.message.chat.id, message_id=self.message.message_id, parse_mode='html')
             await asyncio.sleep(0.1)
             await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id, message_id=self.message.message_id,
                                                         reply_markup=kb2)
         except TelegramBadRequest as e:
             if "message can't be edited" in str(e):
-                await self.bot.send_message(chat_id=self.message.chat.id, text=f'{self.question}',
-                                            message_thread_id=self.message.message_thread_id, reply_markup=kb2)
+                await self.bot.send_message(chat_id=self.message.chat.id, text=self.question,
+                                            message_thread_id=self.message.message_thread_id, parse_mode='html',
+                                            reply_markup=kb2)
         except Exception as e:
             logger.exception('Ошибка в keyboards/menu_buttons', e)
             await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/menu_buttons: {e}')
@@ -93,36 +94,47 @@ class Buttons:  # класс для создания клавиатур разл
     #         await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/new_main_menu_buttons: {e}')
 
 
-    async def breef_buttons(self, bot_message_id, idx=1, answer=None):
-        # idx = 1 - со 2 по последний вопросы при последовательном ответе на вопросы
+    async def breef_buttons(self, bot_message_id, idx=1, answer=None, number_of_question=1, quantity_of_questions=1):
+        # idx = 1 - со 2 по предпоследний вопросы при последовательном ответе на вопросы
+        # idx = 2 - последний вопрос
         # idx = 0 - 1 вопрос
         if answer is None:
             question_text = self.question
         else:
             question_text = f'{self.question}\n\nВаш ответ:{answer}'
         try:
-            if idx == 1:
-                kb_breef = InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text='⬅️ Предыдущий вопрос', callback_data='назад')],
-                    [InlineKeyboardButton(text='❌ Отмена', callback_data="Основное меню")]])
-                if answer is None:
-                    # удаление вопроса пользователя происходит только
-                    await self.bot.delete_message(chat_id=self.message.chat.id, message_id=self.message.message_id)
-            elif idx == 2:
+            if idx == 2:
                 kb_breef = InlineKeyboardMarkup(inline_keyboard=[
                     [InlineKeyboardButton(text='✅ Отправить ответы', callback_data='✅ Отправить ответы')],
                     [InlineKeyboardButton(text='❌ Отмена', callback_data="Основное меню")]])
+                message = await self.bot.edit_message_text(text=f'{question_text}',chat_id=self.message.chat.id,
+                                                           message_id=bot_message_id, parse_mode='html')
+                await asyncio.sleep(0.1)
+                await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id,
+                                                         message_id=bot_message_id, reply_markup=kb_breef)
+                if answer is None:
+                    await self.bot.delete_message(chat_id=self.message.chat.id, message_id=self.message.message_id)
+                return message
 
             else:
-                kb_breef = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='❌ Отмена',
-                                                                                       callback_data="Основное меню")]])
-            message = await self.bot.edit_message_text(
-                text=f'{question_text}', chat_id=self.message.chat.id, message_id=bot_message_id,
-                parse_mode='markdown')
-            await asyncio.sleep(0.1)
-            await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id,
-                                                     message_id=bot_message_id, reply_markup=kb_breef)
-            return message
+                if idx == 1:
+                    kb_breef = InlineKeyboardMarkup(inline_keyboard=[
+                        [InlineKeyboardButton(text='⬅️ Предыдущий вопрос', callback_data='назад')],
+                        [InlineKeyboardButton(text='❌ Отмена', callback_data="Основное меню")]])
+                    if answer is None:
+                        await self.bot.delete_message(chat_id=self.message.chat.id, message_id=self.message.message_id)
+
+                elif idx == 0:
+                    kb_breef = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='❌ Отмена',
+                                                                                           callback_data="Основное меню")]])
+                message = await self.bot.edit_message_text(
+                    text=f'<b>Вопрос {number_of_question} из {quantity_of_questions}</b>\n\n{question_text}',
+                    chat_id=self.message.chat.id, message_id=bot_message_id,
+                    parse_mode='html')
+                await asyncio.sleep(0.1)
+                await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id,
+                                                         message_id=bot_message_id, reply_markup=kb_breef)
+                return message
         except TelegramBadRequest as e:
             logger.info('Ошибка в keyboards/breef_buttons', e)
         except Exception as e:
@@ -136,22 +148,3 @@ class Buttons:  # класс для создания клавиатур разл
             [InlineKeyboardButton(text='❌ Отмена', callback_data="Основное меню")]])
         await self.bot.send_message(text='Выберите базу для отправки рассылки:', chat_id=self.message.chat.id,
                                          reply_markup=kb_rasylka)
-
-    async def zayavka_buttons(self):
-        try:
-            kb_zayavka = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text='✅ Оформить заявку', callback_data='✅ Оформить заявку')],
-                [InlineKeyboardButton(text='⬅️ В основное меню', callback_data="Основное меню")]])
-            try:
-                await self.bot.edit_message_text(text=f'{self.menu_level}', chat_id=self.message.chat.id,
-                                                 message_id=self.message.message_id, parse_mode='html')
-                await asyncio.sleep(0.1)
-                await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id,
-                                                         message_id=self.message.message_id,
-                                                         reply_markup=kb_zayavka)
-            except TelegramBadRequest:
-                await self.bot.send_message(text=f'{self.menu_level}', chat_id=self.message.chat.id,
-                                            reply_markup=kb_zayavka, parse_mode='html')
-        except Exception as e:
-            logger.exception('Ошибка в keyboards/zayavka_buttons', e)
-            await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/zayavka_buttons: {e}')
