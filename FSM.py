@@ -2,7 +2,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from loguru import logger
 
-from paswords import group_id
+from paswords import group_id, admin_id
 from google_sheets import get_sheet_base
 
 
@@ -25,14 +25,14 @@ class Breef(StatesGroup):
 
 
 async def message_from_user(message, state: FSMContext, bot):
-    await bot.send_message(group_id, f'Сообщение от пользователя @{message.from_user.username}:')
-    await bot.copy_message(group_id, message.chat.id, message.message_id)
+    await bot.send_message(admin_id, f'Сообщение от пользователя @{message.from_user.username}:')
+    await bot.copy_message(admin_id, message.chat.id, message.message_id)
     await bot.send_message(message.chat.id, 'Ваше сообщение отправлено ✅')
     await state.clear()
 
 
 async def message_from_admin_chat(message, state: FSMContext, bot):
-    if str.isdigit(message.text) is True:
+    if str.isdigit(message.text):
         await state.update_data(user_id=message.text)
         await bot.send_message(message.chat.id, 'Введите сообщение')
         await state.set_state(Message_from_admin.message)

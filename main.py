@@ -6,21 +6,12 @@ from aiogram.types import BotCommand
 from loguru import logger
 
 from paswords import codemashine_test, loggs_acc, codemachinee_breef_bot
-from FSM import (
-    Get_admin,
-    Message_from_admin,
-    Rassylka,
-    message_from_admin_chat,
-    message_from_admin_text,
-    message_from_user,
-    rassylka, Breef
-)
+from FSM import Breef
 from functions import clients_base
 from google_sheets import get_sheet_base
 from handlers import (
     check_callbacks,
     day_visitors,
-    # handler_user_message,
     help,
     menu,
     post,
@@ -55,23 +46,8 @@ dp.message.register(post, Command(commands='post'))
 dp.message.register(sent_message, Command(commands='sent_message'))
 dp.message.register(day_visitors, Command(commands='day_visitors'))
 
-#
-# dp.message.register(message_from_user, Get_admin.message)
-# #
-# dp.message.register(rassylka, Rassylka.post)
-# #
-# dp.message.register(message_from_admin_chat, Message_from_admin.user_id)
-# dp.message.register(message_from_admin_text, Message_from_admin.message)
-
-# dp.callback_query.register(count_price_step_one, Next_level_base.info)
-# dp.message.register(count_price_step_two, Next_level_base.quantity)
-
 dp.callback_query.register(check_callbacks, Breef.in_progress)
-# dp.callback_query.register(check_callbacks, Next_level_base.model)
-# dp.callback_query.register(check_callbacks, Next_level_base.price)
 dp.callback_query.register(check_callbacks, F.data)
-
-# dp.message.register(handler_user_message_info, Next_level_base.info)
 dp.message.register(check_messages, F.text, Breef.in_progress)
 
 

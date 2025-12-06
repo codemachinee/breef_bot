@@ -1,9 +1,4 @@
-import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Any
-
-import aiohttp
-from aiogram.types import Message
 from loguru import logger
 
 
