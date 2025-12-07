@@ -50,8 +50,6 @@ async def message_from_admin_text(message, state: FSMContext, bot):
 
 
 async def rassylka(message, bot, state: FSMContext):
-    # data = await state.get_data()
-    # data_base = data.get('base')
     sheet_base = await get_sheet_base()
     await sheet_base.rasylka_v_bazu(bot, message)
     await state.clear()

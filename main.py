@@ -6,7 +6,16 @@ from aiogram.types import BotCommand
 from loguru import logger
 
 from paswords import codemashine_test, loggs_acc, codemachinee_breef_bot
-from FSM import Breef, message_from_user, Get_admin
+from FSM import (
+    Breef,
+    message_from_user,
+    Get_admin,
+    message_from_admin_chat,
+    Message_from_admin,
+    message_from_admin_text,
+    rassylka,
+    Rassylka,
+)
 from functions import clients_base
 from google_sheets import get_sheet_base
 from handlers import (
@@ -45,6 +54,10 @@ dp.message.register(menu, Command(commands='menu'))
 dp.message.register(post, Command(commands='post'))
 dp.message.register(sent_message, Command(commands='sent_message'))
 dp.message.register(day_visitors, Command(commands='day_visitors'))
+
+dp.message.register(message_from_admin_chat, Message_from_admin.user_id)
+dp.message.register(message_from_admin_text, Message_from_admin.message)
+dp.message.register(rassylka, Rassylka.post)
 
 dp.callback_query.register(check_callbacks, Breef.in_progress)
 dp.callback_query.register(check_callbacks, F.data)

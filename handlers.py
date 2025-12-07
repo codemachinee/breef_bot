@@ -219,6 +219,15 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
             await sheet_base.record_in_base(bot, message=callback.message, section=section, answers=answers)
             await state.clear()
 
+        elif callback.data == "Общая база клиентов":
+            await bot.edit_message_text(
+                text="База для рассылки: Общая база клиентов\nОтправь мне пост 💬",
+                chat_id=callback.message.chat.id,
+                message_id=callback.message.message_id,
+            )
+            await state.update_data(base=callback.data)
+            await state.set_state(Rassylka.post)
+
     except Exception as e:
         logger.exception('Ошибка в handlers/check_callbacks', e)
         await bot.send_message(loggs_acc, f'Ошибка в handlers/check_callbacks: {e}')
