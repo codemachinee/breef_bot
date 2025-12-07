@@ -137,10 +137,18 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
     assert callback is not None   # обозначаем для проверочной библиотеки mypy, чтобы избегать лишних ошибок при тесте
     assert callback.data is not None
     try:
-        if callback.data == 'ℹ️ О нас':
+        if callback.data == 'ℹ️ Обо мне':
             await state.clear()
             await Buttons(bot, callback.message, {},"Основное меню",
                           question=HELP_TEXT).menu_buttons()
+
+        elif callback.data == "🔎 Примеры работ":
+            await bot.send_message(
+                chat_id=callback.message.chat.id,
+                text="<b>Перейти на google диск для просмотра портфолио: </b>"
+                "https://drive.google.com/drive/folders/1IJIbj-ML4eG5jdoWohRyRC2fqR92jkUE?usp=sharing",
+                parse_mode="html",
+            )
 
         elif callback.data == "👨🏻‍💻 Чат с администратором":
             await state.clear()

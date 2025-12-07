@@ -6,7 +6,7 @@ from aiogram.types import BotCommand
 from loguru import logger
 
 from paswords import codemashine_test, loggs_acc, codemachinee_breef_bot
-from FSM import Breef
+from FSM import Breef, message_from_user, Get_admin
 from functions import clients_base
 from google_sheets import get_sheet_base
 from handlers import (
@@ -49,6 +49,7 @@ dp.message.register(day_visitors, Command(commands='day_visitors'))
 dp.callback_query.register(check_callbacks, Breef.in_progress)
 dp.callback_query.register(check_callbacks, F.data)
 dp.message.register(check_messages, F.text, Breef.in_progress)
+dp.message.register(message_from_user, Get_admin.message)
 
 
 async def set_commands():

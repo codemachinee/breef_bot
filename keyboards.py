@@ -2,12 +2,11 @@ import asyncio
 
 from aiogram import types
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from loguru import logger
 
 from paswords import loggs_acc
-from structure import structure_menu, questions
+from structure import structure_menu
 
 
 class Buttons:  # класс для создания клавиатур различных категорий товаров
@@ -47,7 +46,7 @@ class Buttons:  # класс для создания клавиатур разл
             kb2 = types.InlineKeyboardMarkup(inline_keyboard=keyboard_list, resize_keyboard=True)
             await asyncio.sleep(0.3)
             await self.bot.edit_message_text(
-                text=self.question, chat_id=self.message.chat.id, message_id=self.message.message_id, parse_mode='html')
+                text=self.question, chat_id=self.message.chat.id, message_id=self.message.message_id, parse_mode='markdown')
             await asyncio.sleep(0.1)
             await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id, message_id=self.message.message_id,
                                                         reply_markup=kb2)
@@ -59,40 +58,6 @@ class Buttons:  # класс для создания клавиатур разл
         except Exception as e:
             logger.exception('Ошибка в keyboards/menu_buttons', e)
             await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/menu_buttons: {e}')
-
-
-    # async def new_main_menu_buttons(self):
-    #     try:
-    #         keys = {}
-    #         keyboard_list = []
-    #         keys_list = list(self.keys_dict)
-    #         for i in keys_list:
-    #             index = keys_list.index(i)
-    #             button = types.InlineKeyboardButton(text=i, callback_data=i)
-    #             keys[f'but{index}'] = button
-    #
-    #             # Группируем кнопки попарно
-    #             if index > 0 and index % 2 != 0:
-    #                 previous_button = keys[f'but{index - 1}']
-    #                 if len(i[1]) <= 16 and len(keys_list[index - 1][1]) <= 16:
-    #                     keyboard_list.append([previous_button])
-    #                     keyboard_list.append([button])
-    #                 else:
-    #                     keyboard_list.append([previous_button])
-    #                     keyboard_list.append([button])
-    #             elif index == (len(keys_list) - 1):
-    #                 keyboard_list.append([button])
-    #         kb2 = types.InlineKeyboardMarkup(inline_keyboard=keyboard_list, resize_keyboard=True)
-    #         await asyncio.sleep(0.3)
-    #         await self.bot.send_message(chat_id=self.message.chat.id, text=f'{self.question}',
-    #                                    message_thread_id=self.message.message_thread_id, reply_markup=kb2)
-    #     except TelegramBadRequest as e:
-    #         if "message is not modified" not in str(e):
-    #             logger.info('Ошибка в keyboards/new_main_menu_buttons', e)
-    #     except Exception as e:
-    #         logger.exception('Ошибка в keyboards/menu_buttons', e)
-    #         await self.bot.send_message(loggs_acc, f'Ошибка в keyboards/new_main_menu_buttons: {e}')
-
 
     async def breef_buttons(self, bot_message_id, idx=1, answer=None, number_of_question=1, quantity_of_questions=1):
         # idx = 1 - со 2 по предпоследний вопросы при последовательном ответе на вопросы
