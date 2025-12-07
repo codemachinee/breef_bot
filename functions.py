@@ -1,6 +1,6 @@
 from datetime import datetime
-from loguru import logger
 
+from loguru import logger
 
 
 class Clients:
@@ -9,16 +9,20 @@ class Clients:
 
     async def set_clients(self, data: dict):
         try:
-            self.dict[f"{data['id']}"] = {"username": data['username'], "name": data['name'],
-                                          "reasons": data["reasons"], "date": data["date"]}
+            self.dict[f"{data['id']}"] = {
+                "username": data["username"],
+                "name": data["name"],
+                "reasons": data["reasons"],
+                "date": data["date"],
+            }
         except Exception as e:
-            logger.exception('Исключение вызванное functions/set_clients', e)
+            logger.exception("Исключение вызванное functions/set_clients", e)
 
     async def update_clients(self, id: str, key: str, value: str):
         try:
             self.dict[id][key] = value
         except Exception as e:
-            logger.exception('Исключение вызванное functions/update_clients', e)
+            logger.exception("Исключение вызванное functions/update_clients", e)
 
     async def get_clients(self) -> dict:
         return self.dict
@@ -26,12 +30,16 @@ class Clients:
     async def load_base(self, clients_list: list):
         try:
             for i in clients_list:
-                data = {"id": i[0],"username": i[1], "name": i[2],
-                        "reasons": i[3], "date": i[4]}
+                data = {
+                    "id": i[0],
+                    "username": i[1],
+                    "name": i[2],
+                    "reasons": i[3],
+                    "date": i[4],
+                }
                 await self.set_clients(data)
         except Exception as e:
-            logger.exception('Исключение вызванное functions/load_base', e)
-
+            logger.exception("Исключение вызванное functions/load_base", e)
 
 
 clients_base = Clients()
@@ -44,4 +52,3 @@ async def is_today(date_str: str) -> bool:
         return input_date.date() == now.date()
     except ValueError:
         return False  # если строка не распарсилась
-
