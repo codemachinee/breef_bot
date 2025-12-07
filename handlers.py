@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import pytz
+from google_sheets import moscow_tz
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
@@ -12,7 +12,6 @@ from functions import clients_base, is_today
 from keyboards import Buttons
 from structure import HELP_TEXT, structure_menu
 
-moscow_tz = pytz.timezone("Europe/Moscow")
 
 async def start(message: Message, bot, state: FSMContext):
     await state.clear()
@@ -231,21 +230,6 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
     except Exception as e:
         logger.exception('Ошибка в handlers/check_callbacks', e)
         await bot.send_message(loggs_acc, f'Ошибка в handlers/check_callbacks: {e}')
-
-#
-#
-# async def handler_user_message(message: Message, bot, state: FSMContext):
-#     await state.clear()
-#     product_list = await find_product(message.text)
-#     if product_list is not None:
-#         await Buttons(bot, message, keys_dict=None).speed_find_of_product_buttons(product_list)
-#         if len(product_list) == 1:
-#             await state.set_state(Next_level_base.info)
-#
-#     else:
-#         assistant = await get_assistant_manager()
-#         answer = await assistant.get_response(message.text)
-#         await message.answer(answer)
 
 
 async def check_messages(message: Message, bot, state: FSMContext):
