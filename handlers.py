@@ -55,51 +55,59 @@ async def start(message: Message, bot, state: FSMContext):
 
 async def help(message: Message, bot, state: FSMContext):
     await state.clear()
-    if (
-        message.chat.id in admins_list
-    ):  # условия демонстрации различных команд для админа и клиентов
-        await bot.send_message(
-            message.chat.id,
-            "<b>Основные команды поддерживаемые ботом:\n</b>"
-            "/menu - главное функциональное меню\n"
-            "/start - инициализация бота\n"
-            "/help - список доступных команд\n"
-            "/post - устроить рассылку\n"
-            "/sent_message -  отправка через бота сообщения клиенту по id чата\n"
-            "/day_visitors - пользователи посетившие бота сегодня",
-            parse_mode="html",
-        )
-    else:
-        await bot.send_message(
-            message.chat.id,
-            "<b>Основные команды поддерживаемые ботом:\n</b>"
-            "/menu - главное функциональное меню\n"
-            "/start - инициализация бота\n"
-            "/help - список доступных команд\n\n\n"
-            "@hlapps - разработка ботов любой сложности",
-            parse_mode="html",
-        )
+    try:
+        if (
+            message.chat.id in admins_list
+        ):  # условия демонстрации различных команд для админа и клиентов
+            await bot.send_message(
+                message.chat.id,
+                "<b>Основные команды поддерживаемые ботом:\n</b>"
+                "/menu - главное функциональное меню\n"
+                "/start - инициализация бота\n"
+                "/help - список доступных команд\n"
+                "/post - устроить рассылку\n"
+                "/sent_message -  отправка через бота сообщения клиенту по id чата\n"
+                "/day_visitors - пользователи посетившие бота сегодня",
+                parse_mode="html",
+            )
+        else:
+            await bot.send_message(
+                message.chat.id,
+                "<b>Основные команды поддерживаемые ботом:\n</b>"
+                "/menu - главное функциональное меню\n"
+                "/start - инициализация бота\n"
+                "/help - список доступных команд\n\n\n"
+                "@hlapps - разработка ботов любой сложности",
+                parse_mode="html",
+            )
+    except Exception as e:
+        logger.exception("Ошибка в handlers/help", e)
+        await bot.send_message(loggs_acc, f"Ошибка в handlers/help: {e}")
 
 
 async def menu(message: Message, bot, state: FSMContext):
     await state.clear()
-    if (
-        message.chat.id in admins_list
-    ):  # условия демонстрации различных команд для админа и клиентов
-        await Buttons(
-            bot,
-            message,
-            structure_menu["Основное меню"],
-            question="Пожалуйста выберите интересующий пункт меню:",
-        ).menu_buttons()
+    try:
+        if (
+            message.chat.id in admins_list
+        ):  # условия демонстрации различных команд для админа и клиентов
+            await Buttons(
+                bot,
+                message,
+                structure_menu["Основное меню"],
+                question="Пожалуйста выберите интересующий пункт меню:",
+            ).menu_buttons()
 
-    else:
-        await Buttons(
-            bot,
-            message,
-            structure_menu["Основное меню"],
-            question="Пожалуйста выберите интересующий пункт меню:",
-        ).menu_buttons()
+        else:
+            await Buttons(
+                bot,
+                message,
+                structure_menu["Основное меню"],
+                question="Пожалуйста выберите интересующий пункт меню:",
+            ).menu_buttons()
+    except Exception as e:
+        logger.exception("Ошибка в handlers/menu", e)
+        await bot.send_message(loggs_acc, f"Ошибка в handlers/menu: {e}")
 
 
 async def post(message: Message, bot, state: FSMContext):
@@ -342,96 +350,100 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
 
 
 async def check_messages(message: Message, bot, state: FSMContext):
-    if message.text == "назад":
-        data = await state.get_data()
-        section = data["section"]
-        idx = data["question_idx"]
-        answers = data["answers"]
-        bot_message_id = data["bot_message_id"]
-        idx -= 1
-        if idx == 0:
-            await Buttons(
-                bot, message, question=structure_menu["Основное меню"][section][idx]
-            ).breef_buttons(
-                bot_message_id,
-                idx=0,
-                answer=answers[idx],
-                number_of_question=idx + 1,
-                quantity_of_questions=len(structure_menu["Основное меню"][section]),
-            )
-        else:
-            await Buttons(
-                bot, message, question=structure_menu["Основное меню"][section][idx]
-            ).breef_buttons(
-                bot_message_id=bot_message_id,
-                answer=answers[idx],
-                number_of_question=idx + 1,
-                quantity_of_questions=len(structure_menu["Основное меню"][section]),
-            )
-        answers.pop()  # Удаляем последний ответ
-        await state.update_data(question_idx=idx, answers=answers)
-
-    elif message.text == "Основное меню":
-        await state.clear()
-        await Buttons(
-            bot,
-            message,
-            structure_menu["Основное меню"],
-            question="Пожалуйста выберите интересующий пункт меню:",
-        ).menu_buttons()
-    else:
-        data = await state.get_data()
-        section = data["section"]
-        idx = data["question_idx"]
-        answers = data["answers"]
-        bot_message_id = data["bot_message_id"]
-        if len(answers) > idx:
-            answers[idx] = message.text
-        else:
-            answers.append(message.text)
-
-        idx += 1
-
-        if idx < len(structure_menu["Основное меню"][section]):
+    try:
+        if message.text == "назад":
+            data = await state.get_data()
+            section = data["section"]
+            idx = data["question_idx"]
+            answers = data["answers"]
+            bot_message_id = data["bot_message_id"]
+            idx -= 1
+            if idx == 0:
+                await Buttons(
+                    bot, message, question=structure_menu["Основное меню"][section][idx]
+                ).breef_buttons(
+                    bot_message_id,
+                    idx=0,
+                    answer=answers[idx],
+                    number_of_question=idx + 1,
+                    quantity_of_questions=len(structure_menu["Основное меню"][section]),
+                )
+            else:
+                await Buttons(
+                    bot, message, question=structure_menu["Основное меню"][section][idx]
+                ).breef_buttons(
+                    bot_message_id=bot_message_id,
+                    answer=answers[idx],
+                    number_of_question=idx + 1,
+                    quantity_of_questions=len(structure_menu["Основное меню"][section]),
+                )
+            answers.pop()  # Удаляем последний ответ
             await state.update_data(question_idx=idx, answers=answers)
-            await Buttons(
-                bot, message, question=structure_menu["Основное меню"][section][idx]
-            ).breef_buttons(
-                bot_message_id,
-                idx=1,
-                number_of_question=idx + 1,
-                quantity_of_questions=len(structure_menu["Основное меню"][section]),
-            )
-        else:
-            questions = list(structure_menu["Основное меню"][section])
-            combined_answers = [
-                f"<b>{questions.index(item1) + 1}. {item1}:</b>\n{item2}"
-                for item1, item2 in zip(questions, answers)
-            ]
-            answer = "\n".join(combined_answers)
+
+        elif message.text == "Основное меню":
+            await state.clear()
             await Buttons(
                 bot,
                 message,
-                question="Cпасибо за прохождение опроса! Выберите (✅ Отправить ответы) для передачи "
-                "исполнителю или же пройдите опрос заново (❌ Отмена)."
-                "\n\n" + answer,
-            ).breef_buttons(idx=2, bot_message_id=bot_message_id)
-            await bot.send_message(
-                admin_id,
-                f"🚨!!!СРОЧНО!!!🚨\n"
-                f"<b>Заполненный бриф от:</b>\n"
-                f"Псевдоним: @{message.from_user.username}\n"
-                f"id чата: {message.chat.id}\n\n"
-                f"<b>Предмет интереса:</b>\n"
-                f"Категория: {section}\n"
-                f"/sent_message - отправить сообщение с помощью бота",
-                parse_mode="html",
-            )
-            await bot.send_message(
-                admin_id,
-                f"<b>Ответы:</b>\n\n {answer}\n"
-                "Дополнительная информация в гугл таблице: "
-                "https://docs.google.com/spreadsheets/d/"
-                "1oGihEnG8KIsnZxd8W_B-TxGc10s_aOxpLPZgaqFBTIc/edit?usp=sharing",
-                parse_mode="html",
-            )
+                structure_menu["Основное меню"],
+                question="Пожалуйста выберите интересующий пункт меню:",
+            ).menu_buttons()
+        else:
+            data = await state.get_data()
+            section = data["section"]
+            idx = data["question_idx"]
+            answers = data["answers"]
+            bot_message_id = data["bot_message_id"]
+            if len(answers) > idx:
+                answers[idx] = message.text
+            else:
+                answers.append(message.text)
+
+            idx += 1
+
+            if idx < len(structure_menu["Основное меню"][section]):
+                await state.update_data(question_idx=idx, answers=answers)
+                await Buttons(
+                    bot, message, question=structure_menu["Основное меню"][section][idx]
+                ).breef_buttons(
+                    bot_message_id,
+                    idx=1,
+                    number_of_question=idx + 1,
+                    quantity_of_questions=len(structure_menu["Основное меню"][section]),
+                )
+            else:
+                questions = list(structure_menu["Основное меню"][section])
+                combined_answers = [
+                    f"<b>{questions.index(item1) + 1}. {item1}:</b>\n{item2}"
+                    for item1, item2 in zip(questions, answers)
+                ]
+                answer = "\n".join(combined_answers)
+                await Buttons(
+                    bot,
+                    message,
+                    question="Cпасибо за прохождение опроса! Выберите (✅ Отправить ответы) для передачи "
+                    "исполнителю или же пройдите опрос заново (❌ Отмена)."
+                    "\n\n" + answer,
+                ).breef_buttons(idx=2, bot_message_id=bot_message_id)
+                await bot.send_message(
+                    admin_id,
+                    f"🚨!!!СРОЧНО!!!🚨\n"
+                    f"<b>Заполненный бриф от:</b>\n"
+                    f"Псевдоним: @{message.from_user.username}\n"
+                    f"id чата: {message.chat.id}\n\n"
+                    f"<b>Предмет интереса:</b>\n"
+                    f"Категория: {section}\n"
+                    f"/sent_message - отправить сообщение с помощью бота",
+                    parse_mode="html",
+                )
+                await bot.send_message(
+                    admin_id,
+                    f"<b>Ответы:</b>\n\n {answer}\n"
+                    "Дополнительная информация в гугл таблице: "
+                    "https://docs.google.com/spreadsheets/d/"
+                    "1oGihEnG8KIsnZxd8W_B-TxGc10s_aOxpLPZgaqFBTIc/edit?usp=sharing",
+                    parse_mode="html",
+                )
+    except Exception as e:
+        logger.exception("Ошибка в handlers/check_messages", e)
+        await bot.send_message(loggs_acc, f"Ошибка в handlers/check_messages: {e}")

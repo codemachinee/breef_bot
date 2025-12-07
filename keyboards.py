@@ -183,19 +183,29 @@ class Buttons:  # класс для создания клавиатур разл
             )
 
     async def rasylka_buttons(self):
-        kb_rasylka = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="💿 Общая база клиентов",
-                        callback_data="Общая база клиентов",
-                    )
-                ],
-                [InlineKeyboardButton(text="❌ Отмена", callback_data="Основное меню")],
-            ]
-        )
-        await self.bot.send_message(
-            text="Выберите базу для отправки рассылки:",
-            chat_id=self.message.chat.id,
-            reply_markup=kb_rasylka,
-        )
+        try:
+            kb_rasylka = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(
+                            text="💿 Общая база клиентов",
+                            callback_data="Общая база клиентов",
+                        )
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text="❌ Отмена", callback_data="Основное меню"
+                        )
+                    ],
+                ]
+            )
+            await self.bot.send_message(
+                text="Выберите базу для отправки рассылки:",
+                chat_id=self.message.chat.id,
+                reply_markup=kb_rasylka,
+            )
+        except Exception as e:
+            logger.exception("Ошибка в keyboards/rasylka_buttons", e)
+            await self.bot.send_message(
+                loggs_acc, f"Ошибка в keyboards/rasylka_buttons: {e}"
+            )
