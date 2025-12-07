@@ -73,10 +73,8 @@ class Buttons:  # класс для создания клавиатур разл
                     [InlineKeyboardButton(text='✅ Отправить ответы', callback_data='✅ Отправить ответы')],
                     [InlineKeyboardButton(text='❌ Отмена', callback_data="Основное меню")]])
                 message = await self.bot.edit_message_text(text=f'{question_text}',chat_id=self.message.chat.id,
-                                                           message_id=bot_message_id, parse_mode='html')
-                await asyncio.sleep(0.1)
-                await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id,
-                                                         message_id=bot_message_id, reply_markup=kb_breef)
+                                                           message_id=bot_message_id, reply_markup=kb_breef,
+                                                           parse_mode='html')
                 if answer is None:
                     await self.bot.delete_message(chat_id=self.message.chat.id, message_id=self.message.message_id)
                 return message
@@ -89,16 +87,14 @@ class Buttons:  # класс для создания клавиатур разл
                     if answer is None:
                         await self.bot.delete_message(chat_id=self.message.chat.id, message_id=self.message.message_id)
 
-                elif idx == 0:
+                else:
                     kb_breef = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='❌ Отмена',
                                                                                            callback_data="Основное меню")]])
                 message = await self.bot.edit_message_text(
                     text=f'<b>Вопрос {number_of_question} из {quantity_of_questions}</b>\n\n{question_text}',
-                    chat_id=self.message.chat.id, message_id=bot_message_id,
+                    chat_id=self.message.chat.id, message_id=bot_message_id, reply_markup=kb_breef,
                     parse_mode='html')
-                await asyncio.sleep(0.1)
-                await self.bot.edit_message_reply_markup(chat_id=self.message.chat.id,
-                                                         message_id=bot_message_id, reply_markup=kb_breef)
+
                 return message
         except TelegramBadRequest as e:
             logger.info('Ошибка в keyboards/breef_buttons', e)
