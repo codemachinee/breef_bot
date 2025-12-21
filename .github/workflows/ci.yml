@@ -1,0 +1,99 @@
+name: Deploy Breef Bot
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  actions: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ".python-version"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Create pidor-of-the-day-af3dd140b860.json from secrets
+        run: |
+          cat <<'EOF' > pidor-of-the-day-af3dd140b860.json
+          ${{ secrets.CONFIG_JSON }}
+          EOF
+
+      - name: Create paswords.py from secrets
+        run: |
+          cat <<'EOF' > paswords.py
+          ${{ secrets.PASWORDS_PY }}
+          EOF
+
+      - name: Run tests
+        run: uv run pytest -v
+
+  build-and-push-docker:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/breef-bot:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push-docker
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            # Log in to GHCR
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            
+            # Stop and remove the old container
+            docker rm -f breef-bot || true
+            
+            # Prune the system to save space
+            docker system prune -af
+
+            # Run the new container with mounted secrets
+            docker run --pull=always -d \
+            --name breef-bot \
+            -v /root/breef_bot/paswords.py:/app/paswords.py \
+            -v /root/breef_bot/pidor-of-the-day-af3dd140b860.json:/app/pidor-of-the-day-af3dd140b860.json \
+            -v /root/breef_bot/loggs.log:/app/loggs.log \
+            --restart always \
+            ghcr.io/${{ github.repository_owner }}/breef-bot:latest

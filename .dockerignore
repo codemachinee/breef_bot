@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Python
+.venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE
+.idea/
+
+# CI/CD
+.github/
+
+# Environment
+.env
+
+# Tests
+tests/
+
+# Documentation
+*.md
+
+# Other
+LICENSE
+uv.lock
+loggs.log
+pidor-of-the-day-af3dd140b860.json
+paswords.py
