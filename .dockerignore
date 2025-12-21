@@ -30,7 +30,6 @@ tests/
 
 # Other
 LICENSE
-uv.lock
 loggs.log
 pidor-of-the-day-af3dd140b860.json
 paswords.py
