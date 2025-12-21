@@ -36,7 +36,7 @@ from handlers import (
 )
 
 # Импорт токенов и идентификаторов для логирования и бота
-from paswords import codemachinee_breef_bot, loggs_acc
+from paswords import codemachinee_breef_bot, loggs_acc, codemashine_test
 
 # --- Настройка логирования с помощью Loguru ---
 logger.remove()  # Удаляет стандартные обработчики loguru, чтобы настроить свои
@@ -52,8 +52,8 @@ logger.add(
 )
 
 # --- Инициализация бота и диспетчера ---
-token = codemachinee_breef_bot  # Выбор токена для бота
-# token = codemashine_test # Закомментированный тестовый токен
+# token = codemachinee_breef_bot  # Выбор токена для бота
+token = codemashine_test
 
 bot = Bot(token=token)  # Создание экземпляра бота
 dp = Dispatcher()  # Создание экземпляра диспетчера для обработки событий

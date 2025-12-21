@@ -151,7 +151,7 @@ async def day_visitors(message: Message, bot, state: FSMContext):
     try:
         if message.chat.id in admins_list:
             data = await clients_base.get_clients()
-            for d in data:
+            for d in list(data):
                 if await is_today(data[d]["date"]):
                     today_list.append(
                         [d, data[d]["username"], data[d]["name"], data[d]["date"]]
