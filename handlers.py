@@ -200,11 +200,13 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
     try:
         if callback.data == "ℹ️ Обо мне":
             await state.clear()
+            await bot.answer_callback_query(callback.id)
             await Buttons(
                 bot, callback.message, {}, "Основное меню", question=HELP_TEXT
             ).menu_buttons()
 
         elif callback.data == "🔎 Примеры работ":
+            await bot.answer_callback_query(callback.id)
             await bot.send_message(
                 chat_id=callback.message.chat.id,
                 text="<b>Перейти на google диск для просмотра портфолио: </b>"
@@ -214,6 +216,7 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
 
         elif callback.data == "👨🏻‍💻 Чат с администратором":
             await state.clear()
+            await bot.answer_callback_query(callback.id)
             await bot.edit_message_text(
                 chat_id=callback.message.chat.id,
                 text="Информация передана администратору, с Вами скоро свяжутся. "
@@ -237,6 +240,7 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
 
         elif callback.data == "Основное меню":
             await state.clear()
+            await bot.answer_callback_query(callback.id)
             await Buttons(
                 bot,
                 callback.message,
@@ -245,6 +249,7 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
             ).menu_buttons()
 
         elif callback.data == "назад":
+            await bot.answer_callback_query(callback.id)
             data = await state.get_data()
             section = data["section"]
             idx = data["question_idx"]
@@ -282,7 +287,8 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
             '🌐 Опрос "создание сайта"',
             '🤖 Опрос "создание бота"',
             '🖼 Опрос "другое"',
-        ]:
+            ]:
+            await bot.answer_callback_query(callback.id)
             if str(callback.message.chat.id) not in await clients_base.get_clients():
                 sheet_base = await get_sheet_base()
                 await sheet_base.chec_and_record_in_client_base(bot, callback.message)
@@ -321,6 +327,7 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
             await state.set_state(Breef.in_progress)
 
         elif callback.data == "✅ Отправить ответы":
+            await bot.answer_callback_query(callback.id)
             data = await state.get_data()
             section = data["section"]
             answers = data["answers"]
@@ -336,6 +343,7 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
             await state.clear()
 
         elif callback.data == "Общая база клиентов":
+            await bot.answer_callback_query(callback.id)
             await bot.edit_message_text(
                 text="База для рассылки: Общая база клиентов\nОтправь мне пост 💬",
                 chat_id=callback.message.chat.id,
