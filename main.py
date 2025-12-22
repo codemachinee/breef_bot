@@ -52,8 +52,8 @@ logger.add(
 )
 
 # --- Инициализация бота и диспетчера ---
-# token = codemachinee_breef_bot  # Выбор токена для бота
-token = codemashine_test
+token = codemachinee_breef_bot  # Выбор токена для бота
+# token = codemashine_test
 
 bot = Bot(token=token)  # Создание экземпляра бота
 dp = Dispatcher()  # Создание экземпляра диспетчера для обработки событий
