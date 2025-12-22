@@ -15,6 +15,9 @@ from structure import HELP_TEXT, structure_menu
 async def start(message: Message, bot, state: FSMContext):
     await state.clear()
     try:
+        if not message or not message.chat:
+            logger.warning("Обработчик start получил невалидный объект message.")
+            return
         await bot.send_message(
             message.chat.id,
             "<b>Инструкция по использованию бота:</b>\n\n\n"
@@ -56,6 +59,9 @@ async def start(message: Message, bot, state: FSMContext):
 async def help(message: Message, bot, state: FSMContext):
     await state.clear()
     try:
+        if not message or not message.chat:
+            logger.warning("Обработчик help получил невалидный объект message.")
+            return
         if (
             message.chat.id in admins_list
         ):  # условия демонстрации различных команд для админа и клиентов
@@ -88,6 +94,9 @@ async def help(message: Message, bot, state: FSMContext):
 async def menu(message: Message, bot, state: FSMContext):
     await state.clear()
     try:
+        if not message or not message.chat:
+            logger.warning("Обработчик menu получил невалидный объект message.")
+            return
         if (
             message.chat.id in admins_list
         ):  # условия демонстрации различных команд для админа и клиентов
@@ -113,6 +122,9 @@ async def menu(message: Message, bot, state: FSMContext):
 async def post(message: Message, bot, state: FSMContext):
     await state.clear()
     try:
+        if not message or not message.chat:
+            logger.warning("Обработчик post получил невалидный объект message.")
+            return
         if message.chat.id in admins_list:
             await Buttons(bot, message, {}).rasylka_buttons()
             await state.set_state(Rassylka.post)
@@ -129,6 +141,9 @@ async def post(message: Message, bot, state: FSMContext):
 async def sent_message(message: Message, bot, state: FSMContext):
     try:
         await state.clear()
+        if not message or not message.chat:
+            logger.warning("Обработчик sent_message получил невалидный объект message.")
+            return
         if message.chat.id in admins_list:
             await bot.send_message(
                 message.chat.id,
@@ -147,7 +162,13 @@ async def sent_message(message: Message, bot, state: FSMContext):
 async def day_visitors(message: Message, bot, state: FSMContext):
     await state.clear()
     today_list = []
+    if not message or not message.chat:
+        logger.warning("Обработчик day_visitors получил невалидный объект message.")
+        return
     mess = await bot.send_message(message.chat.id, "Загрузка..🚀")
+    if not mess:
+        logger.warning("Обработчик day_visitors не смог отправить начальное сообщение.")
+        return
     try:
         if message.chat.id in admins_list:
             data = await clients_base.get_clients()
@@ -182,10 +203,11 @@ async def day_visitors(message: Message, bot, state: FSMContext):
                     parse_mode="Markdown",
                 )
         else:
+            thread_id = message.message_thread_id if message else None
             await bot.send_message(
                 message.chat.id,
                 "Недостаточно прав",
-                message_thread_id=message.message_thread_id,
+                message_thread_id=thread_id,
             )
     except Exception as e:
         logger.exception("Ошибка в handlers/day_visitors", e)
@@ -193,69 +215,91 @@ async def day_visitors(message: Message, bot, state: FSMContext):
 
 
 async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
-    assert (
-        callback is not None
-    )  # обозначаем для проверочной библиотеки mypy, чтобы избегать лишних ошибок при тесте
-    assert callback.data is not None
+    if not callback.data:
+        await bot.answer_callback_query(callback.id)
+        logger.warning("Обработчик check_callbacks получил callback без данных.")
+        return
     try:
         if callback.data == "ℹ️ Обо мне":
             await state.clear()
             await bot.answer_callback_query(callback.id)
-            await Buttons(
-                bot, callback.message, {}, "Основное меню", question=HELP_TEXT
-            ).menu_buttons()
+            if callback.message:
+                await Buttons(
+                    bot, callback.message, {}, "Основное меню", question=HELP_TEXT
+                ).menu_buttons()
 
         elif callback.data == "🔎 Примеры работ":
             await bot.answer_callback_query(callback.id)
-            await bot.send_message(
-                chat_id=callback.message.chat.id,
-                text="<b>Перейти на google диск для просмотра портфолио: </b>"
-                "https://drive.google.com/drive/folders/1IJIbj-ML4eG5jdoWohRyRC2fqR92jkUE?usp=sharing",
-                parse_mode="html",
-            )
+            if callback.message and callback.message.chat:
+                await bot.send_message(
+                    chat_id=callback.message.chat.id,
+                    text="<b>Перейти на google диск для просмотра портфолио: </b>"
+                    "https://drive.google.com/drive/folders/1IJIbj-ML4eG5jdoWohRyRC2fqR92jkUE?usp=sharing",
+                    parse_mode="html",
+                )
 
         elif callback.data == "👨🏻‍💻 Чат с администратором":
             await state.clear()
             await bot.answer_callback_query(callback.id)
-            await bot.edit_message_text(
-                chat_id=callback.message.chat.id,
-                text="Информация передана администратору, с Вами скоро свяжутся. "
-                "Если желаете сообщить что-то дополнительно, отправьте в сообщении 💬\n"
-                "Спасибо, что выбрали нас.🤝\n"
-                "Для возвращения меню: /menu",
-                message_id=callback.message.message_id,
+            username = (
+                callback.from_user.username
+                if callback.from_user and callback.from_user.username
+                else "N/A"
             )
+            if callback.message and callback.message.chat:
+                await bot.edit_message_text(
+                    chat_id=callback.message.chat.id,
+                    text="Информация передана администратору, с Вами скоро свяжутся. "
+                    "Если желаете сообщить что-то дополнительно, отправьте в сообщении 💬\n"
+                    "Спасибо, что выбрали нас.🤝\n"
+                    "Для возвращения меню: /menu",
+                    message_id=callback.message.message_id,
+                )
 
-            await bot.send_message(
-                chat_id=admin_id,
-                text=f"🚨!!!СРОЧНО!!!🚨\n"
-                f"<b>поступил запрос на ЧАТ С АДМИНИСТРАТОРОМ от:</b>\n"
-                f"Ссылка: @{callback.from_user.username}\n"
-                f"id чата: {callback.message.chat.id}\n"
-                f"<b>Если ссылка на чат отсутствует запроси контакт или отправь свой с помощью команды</b>:\n"
-                f"/sent_message - отправить сообщение с помощью бота",
-                parse_mode="html",
-            )
-            await state.set_state(Get_admin.message)
+                await bot.send_message(
+                    chat_id=admin_id,
+                    text=f"🚨!!!СРОЧНО!!!🚨\n"
+                    f"<b>поступил запрос на ЧАТ С АДМИНИСТРАТОРОМ от:</b>\n"
+                    f"Ссылка: @{username}\n"
+                    f"id чата: {callback.message.chat.id}\n"
+                    f"<b>Если ссылка на чат отсутствует запроси контакт или отправь свой с помощью команды</b>:\n"
+                    f"/sent_message - отправить сообщение с помощью бота",
+                    parse_mode="html",
+                )
+                await state.set_state(Get_admin.message)
 
         elif callback.data == "Основное меню":
             await state.clear()
             await bot.answer_callback_query(callback.id)
-            await Buttons(
-                bot,
-                callback.message,
-                structure_menu["Основное меню"],
-                question="Пожалуйста выберите интересующий пункт меню:",
-            ).menu_buttons()
+            if callback.message:
+                await Buttons(
+                    bot,
+                    callback.message,
+                    structure_menu["Основное меню"],
+                    question="Пожалуйста выберите интересующий пункт меню:",
+                ).menu_buttons()
 
         elif callback.data == "назад":
             await bot.answer_callback_query(callback.id)
             data = await state.get_data()
-            section = data["section"]
-            idx = data["question_idx"]
-            answers = data["answers"]
-            bot_message_id = data["bot_message_id"]
+            if not data or not callback.message:
+                return  # Not enough data to proceed
+            section = data.get("section")
+            idx = data.get("question_idx")
+            answers = data.get("answers")
+            bot_message_id = data.get("bot_message_id")
+            if (
+                section is None
+                or idx is None
+                or answers is None
+                or bot_message_id is None
+            ):
+                return  # Missing essential data in state
+
             idx -= 1
+            if idx < 0:
+                return  # Cannot go back further
+
             if idx == 0:
                 bot_message = await Buttons(
                     bot,
@@ -265,7 +309,9 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
                     bot_message_id,
                     idx=0,
                     answer=answers[idx],
-                    quantity_of_questions=len(structure_menu["Основное меню"][section]),
+                    quantity_of_questions=len(
+                        structure_menu["Основное меню"][section]
+                    ),
                 )
             else:
                 bot_message = await Buttons(
@@ -275,28 +321,46 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
                 ).breef_buttons(
                     bot_message_id=bot_message_id,
                     answer=answers[idx],
-                    quantity_of_questions=len(structure_menu["Основное меню"][section]),
+                    quantity_of_questions=len(
+                        structure_menu["Основное меню"][section]
+                    ),
                     number_of_question=idx + 1,
                 )
-            # answers.pop()
-            await state.update_data(
-                question_idx=idx, answers=answers, bot_message_id=bot_message.message_id
-            )
+            if bot_message:
+                await state.update_data(
+                    question_idx=idx,
+                    answers=answers,
+                    bot_message_id=bot_message.message_id,
+                )
 
         elif callback.data in [
             '🌐 Опрос "создание сайта"',
             '🤖 Опрос "создание бота"',
             '🖼 Опрос "другое"',
-            ]:
+        ]:
             await bot.answer_callback_query(callback.id)
+            if not callback.message or not callback.message.chat:
+                return
+
+            username = (
+                callback.message.chat.username
+                if callback.message.chat and callback.message.chat.username
+                else "N/A"
+            )
+            first_name = (
+                callback.message.chat.first_name
+                if callback.message.chat and callback.message.chat.first_name
+                else "N/A"
+            )
+
             if str(callback.message.chat.id) not in await clients_base.get_clients():
                 sheet_base = await get_sheet_base()
                 await sheet_base.chec_and_record_in_client_base(bot, callback.message)
                 await clients_base.set_clients(
                     data={
                         "id": callback.message.chat.id,
-                        "username": callback.message.chat.username,
-                        "name": callback.message.chat.first_name,
+                        "username": username,
+                        "name": first_name,
                         "reasons": callback.data,
                         "date": str(datetime.now(moscow_tz).strftime("%d.%m.%y %H:%M")),
                     }
@@ -318,19 +382,25 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
                     structure_menu["Основное меню"][callback.data]
                 ),
             )
-            await state.update_data(
-                section=callback.data,
-                question_idx=0,
-                answers=[],
-                bot_message_id=bot_message.message_id,
-            )
-            await state.set_state(Breef.in_progress)
+            if bot_message:
+                await state.update_data(
+                    section=callback.data,
+                    question_idx=0,
+                    answers=[],
+                    bot_message_id=bot_message.message_id,
+                )
+                await state.set_state(Breef.in_progress)
 
         elif callback.data == "✅ Отправить ответы":
             await bot.answer_callback_query(callback.id)
+            if not callback.message or not callback.message.chat:
+                return
             data = await state.get_data()
-            section = data["section"]
-            answers = data["answers"]
+            section = data.get("section")
+            answers = data.get("answers")
+            if section is None or answers is None:
+                return
+
             await bot.edit_message_text(
                 text="✅ Результаты опроса отправлены",
                 chat_id=callback.message.chat.id,
@@ -344,13 +414,14 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
 
         elif callback.data == "Общая база клиентов":
             await bot.answer_callback_query(callback.id)
-            await bot.edit_message_text(
-                text="База для рассылки: Общая база клиентов\nОтправь мне пост 💬",
-                chat_id=callback.message.chat.id,
-                message_id=callback.message.message_id,
-            )
-            await state.update_data(base=callback.data)
-            await state.set_state(Rassylka.post)
+            if callback.message and callback.message.chat:
+                await bot.edit_message_text(
+                    text="База для рассылки: Общая база клиентов\nОтправь мне пост 💬",
+                    chat_id=callback.message.chat.id,
+                    message_id=callback.message.message_id,
+                )
+                await state.update_data(base=callback.data)
+                await state.set_state(Rassylka.post)
 
     except Exception as e:
         logger.exception("Ошибка в handlers/check_callbacks", e)
@@ -358,14 +429,28 @@ async def check_callbacks(callback: CallbackQuery, bot, state: FSMContext):
 
 
 async def check_messages(message: Message, bot, state: FSMContext):
+    if not message or not message.text:
+        logger.warning("Обработчик check_messages получил сообщение без текста.")
+        return
     try:
         if message.text == "назад":
             data = await state.get_data()
-            section = data["section"]
-            idx = data["question_idx"]
-            answers = data["answers"]
-            bot_message_id = data["bot_message_id"]
+            section = data.get("section")
+            idx = data.get("question_idx")
+            answers = data.get("answers")
+            bot_message_id = data.get("bot_message_id")
+            if (
+                section is None
+                or idx is None
+                or answers is None
+                or bot_message_id is None
+            ):
+                return
+
             idx -= 1
+            if idx < 0:
+                return
+
             if idx == 0:
                 await Buttons(
                     bot, message, question=structure_menu["Основное меню"][section][idx]
@@ -374,7 +459,9 @@ async def check_messages(message: Message, bot, state: FSMContext):
                     idx=0,
                     answer=answers[idx],
                     number_of_question=idx + 1,
-                    quantity_of_questions=len(structure_menu["Основное меню"][section]),
+                    quantity_of_questions=len(
+                        structure_menu["Основное меню"][section]
+                    ),
                 )
             else:
                 await Buttons(
@@ -383,9 +470,12 @@ async def check_messages(message: Message, bot, state: FSMContext):
                     bot_message_id=bot_message_id,
                     answer=answers[idx],
                     number_of_question=idx + 1,
-                    quantity_of_questions=len(structure_menu["Основное меню"][section]),
+                    quantity_of_questions=len(
+                        structure_menu["Основное меню"][section]
+                    ),
                 )
-            answers.pop()  # Удаляем последний ответ
+            if answers:
+                answers.pop()  # Удаляем последний ответ
             await state.update_data(question_idx=idx, answers=answers)
 
         elif message.text == "Основное меню":
@@ -398,10 +488,18 @@ async def check_messages(message: Message, bot, state: FSMContext):
             ).menu_buttons()
         else:
             data = await state.get_data()
-            section = data["section"]
-            idx = data["question_idx"]
-            answers = data["answers"]
-            bot_message_id = data["bot_message_id"]
+            section = data.get("section")
+            idx = data.get("question_idx")
+            answers = data.get("answers")
+            bot_message_id = data.get("bot_message_id")
+            if (
+                section is None
+                or idx is None
+                or answers is None
+                or bot_message_id is None
+            ):
+                return
+
             if len(answers) > idx:
                 answers[idx] = message.text
             else:
@@ -412,12 +510,16 @@ async def check_messages(message: Message, bot, state: FSMContext):
             if idx < len(structure_menu["Основное меню"][section]):
                 await state.update_data(question_idx=idx, answers=answers)
                 await Buttons(
-                    bot, message, question=structure_menu["Основное меню"][section][idx]
+                    bot,
+                    message,
+                    question=structure_menu["Основное меню"][section][idx],
                 ).breef_buttons(
                     bot_message_id,
                     idx=1,
                     number_of_question=idx + 1,
-                    quantity_of_questions=len(structure_menu["Основное меню"][section]),
+                    quantity_of_questions=len(
+                        structure_menu["Основное меню"][section]
+                    ),
                 )
             else:
                 questions = list(structure_menu["Основное меню"][section])
@@ -431,13 +533,20 @@ async def check_messages(message: Message, bot, state: FSMContext):
                     message,
                     question="Cпасибо за прохождение опроса! Выберите (✅ Отправить ответы) для передачи "
                     "исполнителю или же пройдите опрос заново (❌ Отмена)."
-                    "\n\n" + answer,
+                    "\n\n"
+                    + answer,
                 ).breef_buttons(idx=2, bot_message_id=bot_message_id)
+
+                username = (
+                    message.from_user.username
+                    if message.from_user and message.from_user.username
+                    else "N/A"
+                )
                 await bot.send_message(
                     admin_id,
                     f"🚨!!!СРОЧНО!!!🚨\n"
                     f"<b>Заполненный бриф от:</b>\n"
-                    f"Псевдоним: @{message.from_user.username}\n"
+                    f"Псевдоним: @{username}\n"
                     f"id чата: {message.chat.id}\n\n"
                     f"<b>Предмет интереса:</b>\n"
                     f"Категория: {section}\n"
