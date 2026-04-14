@@ -92,6 +92,8 @@ jobs:
             # Run the new container with mounted secrets
             docker run --pull=always -d \
             --name breef-bot \
+            --restart unless-stopped \
+            --network host \
             -v /root/breef_bot/paswords.py:/app/paswords.py \
             -v /root/breef_bot/pidor-of-the-day-af3dd140b860.json:/app/pidor-of-the-day-af3dd140b860.json \
             -v /root/breef_bot/loggs.log:/app/loggs.log \

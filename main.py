@@ -52,10 +52,18 @@ logger.add(
 )
 
 # --- Инициализация бота и диспетчера ---
+BOT_API_TIMEOUT_SECONDS = 90
+TELEGRAM_PROXY_URL = "socks5://127.0.0.1:1080"
+
 token = codemachinee_breef_bot  # Выбор токена для бота
 # token = codemashine_test
 
-bot = Bot(token=token)  # Создание экземпляра бота
+bot_session = AiohttpSession(
+    proxy=TELEGRAM_PROXY_URL,
+    timeout=BOT_API_TIMEOUT_SECONDS,
+)
+
+bot = Bot(token=token, session=bot_session)  # Создание экземпляра бота
 dp = Dispatcher()  # Создание экземпляра диспетчера для обработки событий
 
 # --- Регистрация обработчиков сообщений и команд ---
