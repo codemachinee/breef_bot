@@ -79,6 +79,8 @@ target/
 celerybeat-schedule
 
 # SageMath parsed files
+# Log files
+logs/
 *.sage.py
 
 # virtualenv

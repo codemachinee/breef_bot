@@ -42,7 +42,7 @@ from paswords import codemachinee_breef_bot, loggs_acc
 # --- Настройка логирования с помощью Loguru ---
 logger.remove()  # Удаляет стандартные обработчики loguru, чтобы настроить свои
 logger.add(
-    "loggs.log",  # Путь к файлу логов
+    "logs/loggs.log",  # Путь к файлу логов (сохраняем в папку для корректной ротации в Docker)
     format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",  # Формат записи в лог
     level="INFO",  # Минимальный уровень логирования
     rotation="5 MB",  # Ротация файла при достижении 5 MB
