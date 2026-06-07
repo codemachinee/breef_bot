@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  breef_bot:
+    build: .
+    container_name: breef-bot
+    restart: always
+    environment:
+      - TELEGRAM_PROXY_URL=http://vless-proxy:10808
+      - HTTP_PROXY=http://vless-proxy:10808
+      - HTTPS_PROXY=http://vless-proxy:10808
+      - GOOGLE_CLOUD_PROJECT=pidor-of-the-day
+    volumes:
+      # Монтируем папку для логов, чтобы работала ротация Loguru
+      - /volume2/docker/bots/breef_bot/logs:/app/logs
+    networks:
+      - mediaserver_net
+
+networks:
+  mediaserver_net:
+    external: true
+    name: mediaserver-stack_default

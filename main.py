@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.session.aiohttp import AiohttpSession
@@ -54,7 +55,7 @@ logger.add(
 
 # --- Инициализация бота и диспетчера ---
 BOT_API_TIMEOUT_SECONDS = 90
-TELEGRAM_PROXY_URL = "socks5://127.0.0.1:1080"
+TELEGRAM_PROXY_URL = os.getenv("TELEGRAM_PROXY_URL", "socks5://127.0.0.1:1080")
 
 token = codemachinee_breef_bot  # Выбор токена для бота
 # token = codemashine_test
