@@ -1,11 +1,11 @@
 # Используем образ с uv для сборщика
-FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
 # Копируем зависимости в рабочую директорию
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock .python-version* ./
 
 # синхронизируем зависимости, удаляем лишнее
 RUN uv sync && \
@@ -17,4 +17,4 @@ RUN uv sync && \
 COPY . .
 
 # Запускаем бота
-CMD ["uv","run","python", "main.py"]
+CMD ["uv", "run", "--no-sync", "python", "main.py"]
